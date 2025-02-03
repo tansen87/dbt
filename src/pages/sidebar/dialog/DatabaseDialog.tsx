@@ -53,14 +53,14 @@ export function DatabaseDialog() {
               control={form.control}
               name="dialect"
               render={({ field }) => (
-                <FormItem className="flex items-center w-[62.5%]">
-                  <FormLabel className="w-1/5 mr-2 mt-2">Dialect</FormLabel>
+                <FormItem className="flex items-center w-full">
+                  <FormLabel className="w-1/5 mr-2 mt-2 shrink-0">Dialect</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
                     {...field}
                   >
-                    <FormControl className="w-4/5">
+                    <FormControl className="flex-grow">
                       <SelectTrigger>
                         <SelectValue placeholder="Select a dialect" />
                       </SelectTrigger>
@@ -82,10 +82,10 @@ export function DatabaseDialog() {
                   control={form.control}
                   name="path"
                   render={({ field }) => (
-                    <FormItem className="flex items-center w-[62.5%]">
-                      <FormLabel className="w-1/5 mr-2 mt-2">Path</FormLabel>
-                      <FormControl className="w-4/5">
-                        <Input {...field} />
+                    <FormItem className="flex items-center w-full">
+                      <FormLabel className="w-1/5 mr-2 mt-2 shrink-0">Path</FormLabel>
+                      <FormControl className="flex-grow">
+                        <Input {...field} className="w-full" />
                       </FormControl>
                     </FormItem>
                   )}
@@ -94,12 +94,12 @@ export function DatabaseDialog() {
                   control={form.control}
                   name="cwd"
                   render={({ field }) => (
-                    <FormItem className="flex items-center w-[62.5%]">
-                      <FormLabel className="w-1/5 mr-2 mt-2">
+                    <FormItem className="flex items-center w-full">
+                      <FormLabel className="w-1/5 mr-2 mt-2 shrink-0">
                         Work Path
                       </FormLabel>
-                      <FormControl className="w-4/5">
-                        <Input {...field} />
+                      <FormControl className="flex-grow">
+                        <Input {...field} className="w-full" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

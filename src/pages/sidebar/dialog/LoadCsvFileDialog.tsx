@@ -78,10 +78,10 @@ export function LoadCsvFileDialog() {
               control={form.control}
               name="path"
               render={({ field }) => (
-                <FormItem className="flex items-center w-[62.5%]">
-                  <FormLabel className="w-1/5 mr-2 mt-2">Csv path</FormLabel>
-                  <FormControl className="w-4/5">
-                    <Input {...field} />
+                <FormItem className="flex items-center w-full">
+                  <FormLabel className="w-1/5 mr-2 mt-2 shrink-0">Csv path</FormLabel>
+                  <FormControl className="flex-grow">
+                    <Input {...field} className="w-full" />
                   </FormControl>
                 </FormItem>
               )}
@@ -90,10 +90,10 @@ export function LoadCsvFileDialog() {
               control={form.control}
               name="delimiter"
               render={({ field }) => (
-                <FormItem className="flex items-center w-[62.5%]">
-                  <FormLabel className="w-1/5 mr-2 mt-2">Delimiter</FormLabel>
-                  <FormControl className="w-4/5">
-                    <Input {...field} />
+                <FormItem className="flex items-center w-full">
+                  <FormLabel className="w-1/5 mr-2 mt-2 shrink-0">Delimiter</FormLabel>
+                  <FormControl className="flex-grow">
+                    <Input {...field} className="w-full" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -103,10 +103,10 @@ export function LoadCsvFileDialog() {
               control={form.control}
               name="quote"
               render={({ field }) => (
-                <FormItem className="flex items-center w-[62.5%]">
-                  <FormLabel className="w-1/5 mr-2 mt-2">Quote</FormLabel>
-                  <FormControl className="w-4/5">
-                    <Input {...field} />
+                <FormItem className="flex items-center w-full">
+                  <FormLabel className="w-1/5 mr-2 mt-2 shrink-0">Quote</FormLabel>
+                  <FormControl className="flex-grow">
+                    <Input {...field} className="w-full" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -116,10 +116,10 @@ export function LoadCsvFileDialog() {
               control={form.control}
               name="tableName"
               render={({ field }) => (
-                <FormItem className="flex items-center w-[62.5%]">
-                  <FormLabel className="w-1/5 mr-2 mt-2">Table name</FormLabel>
-                  <FormControl className="w-4/5">
-                    <Input {...field} />
+                <FormItem className="flex items-center w-full">
+                  <FormLabel className="w-1/5 mr-2 mt-2 shrink-0">Table name</FormLabel>
+                  <FormControl className="flex-grow">
+                    <Input {...field} className="w-full" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -129,10 +129,10 @@ export function LoadCsvFileDialog() {
               control={form.control}
               name="varchar"
               render={({ field }) => (
-                <FormItem className="flex items-center w-[62.5%]">
-                  <FormLabel className="w-1/5 mr-2 mt-2">Varchar</FormLabel>
-                  <FormControl className="w-4/5">
-                    <Input {...field} />
+                <FormItem className="flex items-center w-full">
+                  <FormLabel className="w-1/5 mr-2 mt-2 shrink-0">Varchar</FormLabel>
+                  <FormControl className="flex-grow">
+                    <Input {...field} className="w-full" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

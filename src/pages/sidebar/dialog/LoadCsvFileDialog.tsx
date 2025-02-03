@@ -69,7 +69,7 @@ export function LoadCsvFileDialog() {
       onOpenChange={setOpen}
       title="Load csv into duckdb"
       className="min-w-[800px] min-h-[500px]"
-      trigger={<TooltipButton tooltip="Add data" icon={<IconFileTypeCsv />} />}
+      trigger={<TooltipButton tooltip="Load CSV" icon={<IconFileTypeCsv />} />}
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col">

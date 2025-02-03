@@ -2,11 +2,12 @@ import { IconFileTypeCsv } from '@tabler/icons-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { invoke } from '@tauri-apps/api/core';
+import { toast } from 'sonner';
 
 import { Dialog } from '@/components/custom/Dialog';
 import { TooltipButton } from '@/components/custom/button';
 import { Button } from '@/components/ui/button';
-import { DialogClose, DialogFooter } from '@/components/ui/dialog';
+import { DialogFooter } from '@/components/ui/dialog';
 import {
   Form,
   FormControl,
@@ -19,6 +20,7 @@ import { Input } from '@/components/ui/input';
 
 export function LoadCsvFileDialog() {
   const [open, setOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm({
     defaultValues: {
@@ -33,16 +35,31 @@ export function LoadCsvFileDialog() {
   async function onSubmit(values) {
     const { path, delimiter, quote, tableName, varchar } = values;
 
-    const result: string = await invoke("load_csv", {
-      path: path,
-      delimiter: delimiter,
-      quote: quote,
-      tableName: tableName,
-      varchar: varchar
-    });
-    
-    if (JSON.stringify(result).startsWith("load failed")) {
-      console.log(result);
+    if (!path || !delimiter || !tableName || !varchar) {
+      let message = 'The following fields cannot be empty:\n';
+      if (!path) message += '- Csv path\n';
+      if (!delimiter) message += '- Delimiter\n';
+      if (!tableName) message += '- Table name\n';
+      if (!varchar) message += '- Varchar\n';
+
+      toast.error(message);
+      return false;
+    }
+
+    try {
+      const result = await invoke("load_csv", {
+        path,
+        delimiter,
+        quote,
+        tableName,
+        varchar
+      });
+
+      toast.success(`Load CSV successfully, elapsed time ${result} s`);
+      return true;
+    } catch (e) {
+      toast.error(`${e}`);
+      return false;
     }
   }
 
@@ -62,7 +79,7 @@ export function LoadCsvFileDialog() {
               name="path"
               render={({ field }) => (
                 <FormItem className="flex items-center w-[62.5%]">
-                  <FormLabel className="w-1/5 mr-2 mt-2">Path</FormLabel>
+                  <FormLabel className="w-1/5 mr-2 mt-2">Csv path</FormLabel>
                   <FormControl className="w-4/5">
                     <Input {...field} />
                   </FormControl>
@@ -125,11 +142,28 @@ export function LoadCsvFileDialog() {
         </form>
       </Form>
       <DialogFooter>
-        <DialogClose asChild>
-          <Button variant="secondary">Cancel</Button>
-        </DialogClose>
-        <Button type="submit" onClick={form.handleSubmit(onSubmit)}>
-          Ok
+        <Button type="button" variant="secondary" onClick={() => setOpen(false)}>
+          Cancel
+        </Button>
+        <Button 
+          type="submit" 
+          onClick={async (e) => {
+            e.preventDefault();
+            setIsSubmitting(true);
+
+            const success = await form.handleSubmit(async (values) => {
+              return await onSubmit(values);
+            })();
+
+            if (success) {
+              setOpen(false);
+            }
+
+            setIsSubmitting(false);
+          }}
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? 'Loading...' : 'Ok'}
         </Button>
       </DialogFooter>
     </Dialog>

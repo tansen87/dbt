@@ -1,3 +1,4 @@
+use std::path::Path;
 use std::sync::Mutex;
 use std::time::Instant;
 
@@ -9,6 +10,7 @@ use tauri::State;
 use crate::api;
 use crate::api::ArrowResponse;
 use crate::connection::Connection;
+use crate::duck;
 use crate::duck::DuckDbDialect;
 use crate::file::FileDialect;
 use crate::folder::FolderDialect;
@@ -222,4 +224,24 @@ pub async fn find(
   let res = d.find(value, path).await;
 
   Ok(api::convert(res, None))
+}
+
+#[tauri::command]
+pub async fn load_csv(
+  path: String,
+  delimiter: String,
+  quote: String,
+  table_name: String,
+  varchar: String,
+) -> Result<String, String> {
+  let start_time = Instant::now();
+
+  match duck::csv2duckdb(path, delimiter, quote, table_name, varchar).await {
+    Ok(_) => {
+      let end_time = Instant::now();
+      let elapsed_time = end_time.duration_since(start_time).as_secs_f64();
+      Ok(format!("{elapsed_time:.2}"))
+    }
+    Err(err) => Err(format!("load failed: {err}")),
+  }
 }

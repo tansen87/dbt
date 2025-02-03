@@ -12,6 +12,7 @@ import { TooltipButton } from '@/components/custom/button';
 import { useDialog } from '@/components/custom/use-dialog';
 import { ConfigDialog } from '@/pages/sidebar/dialog/ConfigDialog';
 import { DatabaseDialog } from '@/pages/sidebar/dialog/DatabaseDialog';
+import { LoadCsvFileDialog } from '@/pages/sidebar/dialog/LoadCsvFileDialog';
 import {
   DialectType,
   selectedNodeAtom,
@@ -87,6 +88,7 @@ export function SideToolbar({
           <TooltipButton tooltip="Add data folder" onClick={handleAppendFolder}>
             <IconFolderPlus />
           </TooltipButton>
+          <LoadCsvFileDialog />
           <DatabaseDialog />
           <TooltipButton
             tooltip="DB setting"

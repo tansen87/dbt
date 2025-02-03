@@ -1,4 +1,5 @@
 use std::env::{current_dir, set_current_dir};
+use std::path::Path;
 
 use async_trait::async_trait;
 
@@ -165,4 +166,27 @@ pub fn get_tables(conn: &duckdb::Connection, schema: Option<&str>) -> anyhow::Re
     tables.push(row?);
   }
   Ok(tables)
+}
+
+pub async fn csv2duckdb(
+  path: String,
+  delimiter: String,
+  quote: String,
+  table_name: String,
+  varchar: String,
+) -> anyhow::Result<()> {
+  let parent_path = Path::new(&path).parent().unwrap().to_str().unwrap();
+  let file_name = Path::new(&path).file_stem().unwrap().to_str().unwrap();
+  let output_path = format!("{parent_path}/{file_name}.c2d.duckdb");
+
+  let conn = duckdb::Connection::open(output_path)?;
+  let idata = format!(
+    "
+    CREATE TABLE {table_name}
+    AS SELECT *
+    FROM read_csv('{path}', all_varchar={varchar}, sep='{delimiter}', quote='{quote}');
+    "
+  );
+
+  Ok(conn.execute_batch(&idata)?)
 }

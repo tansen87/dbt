@@ -127,6 +127,7 @@ fn main() {
       cmd::drop_table,
       cmd::format_sql,
       cmd::find,
+      cmd::load_csv,
     ])
     .build(tauri::generate_context!())
     .expect("error while running tauri application")

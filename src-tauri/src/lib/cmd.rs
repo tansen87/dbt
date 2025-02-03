@@ -9,7 +9,7 @@ use tauri::State;
 use crate::api;
 use crate::api::ArrowResponse;
 use crate::connection::Connection;
-use crate::duckdb::DuckDbDialect;
+use crate::duck::DuckDbDialect;
 use crate::file::FileDialect;
 use crate::folder::FolderDialect;
 use crate::sqlite::SqliteDialect;

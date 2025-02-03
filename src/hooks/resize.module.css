@@ -1,0 +1,69 @@
+.sideBar {
+  height: 100%;
+  left: 0;
+  top: 0;
+  position: absolute;
+  display: flex;
+}
+
+.controls {
+  width: 4px;
+  opacity: 0;
+  z-index: 99;
+  position: absolute;
+  right: 0;
+  height: 100%;
+}
+
+.controls:hover,
+.controls:active {
+  opacity: 1;
+  width: 4px;
+  background-color: #0078d4;
+}
+
+.resizeVertical {
+  top: 0;
+  display: block;
+  content: "";
+  position: absolute;
+  width: 4px;
+  height: 100vh;
+  cursor: e-resize;
+}
+
+.resizeHorizontal {
+  display: block;
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 4px;
+  cursor: ns-resize;
+}
+
+
+.controlsH {
+  height: 4px;
+  width: 100%;
+  opacity: 0;
+  z-index: 99;
+  position: absolute;
+  right: 0;
+}
+
+.controlsH:hover,
+.controlsH:active {
+  opacity: 1;
+  background-color: #0078d4;
+}
+
+
+.rightBottom {
+  position: absolute;
+  bottom: 0;
+  /* width: 100vw; */
+  /* background-color: green; */
+  /* height: 100px;
+  min-height: 50px;
+  max-height: 300px; */
+}

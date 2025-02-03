@@ -1,0 +1,1 @@
+export { CanvasTable } from './CanvasTable';

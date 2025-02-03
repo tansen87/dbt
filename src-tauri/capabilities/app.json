@@ -1,0 +1,36 @@
+{
+  "$schema": "./schemas/desktop-schema.json",
+  "identifier": "run-app",
+  "description": "permissions to run the app",
+  "windows": [
+    "main",
+    "main-*",
+    "debug*"
+  ],
+  "permissions": [
+    "core:path:default",
+    "core:event:default",
+    "core:app:default",
+    "core:resources:default",
+    "core:menu:default",
+    "core:tray:default",
+    "core:webview:default",
+    "core:webview:allow-create-webview",
+    "core:webview:allow-create-webview-window",
+    "updater:default",
+    "log:default",
+    "shell:allow-open",
+    "clipboard-manager:allow-read-text",
+    "clipboard-manager:allow-write-text",
+    "clipboard-manager:allow-read-image",
+    "clipboard-manager:allow-write-image",
+    "clipboard-manager:allow-clear",
+    "dialog:allow-ask",
+    "dialog:allow-confirm",
+    "dialog:allow-message",
+    "dialog:allow-open",
+    "dialog:allow-save",
+    "window-state:allow-restore-state",
+    "window-state:allow-save-window-state"
+  ]
+}

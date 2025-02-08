@@ -51,7 +51,7 @@ export function QueryView({ context }: { context: QueryContextAtom }) {
         setError(res?.message);
       }
     } catch (error) {
-      toast.error(`${error}`);
+      console.error(`${error}`);
       setError(error as string);
     } finally {
       setLoading(false);
@@ -62,7 +62,7 @@ export function QueryView({ context }: { context: QueryContextAtom }) {
       const ctx = atomStore.get(context);
       await exportData({ file }, ctx);
     } catch (error) {
-      toast.error(`${error}`);
+      console.error(`${error}`);
     }
   };
 

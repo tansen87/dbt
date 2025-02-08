@@ -3,7 +3,9 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { invoke } from '@tauri-apps/api/core';
 import { toast } from 'sonner';
+// import { useAtom } from 'jotai';
 
+import { getDB } from '@/api';
 import { Dialog } from '@/components/custom/Dialog';
 import { TooltipButton } from '@/components/custom/button';
 import { Button } from '@/components/ui/button';
@@ -17,10 +19,14 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { DuckdbConfig, useDBListStore } from '@/stores/dbList';
+// import { settingAtom } from '@/stores/setting';
 
 export function LoadCsvFileDialog() {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const appendDB = useDBListStore((state) => state.append);
+  // const [settings] = useAtom(settingAtom);
 
   const form = useForm({
     defaultValues: {
@@ -32,7 +38,7 @@ export function LoadCsvFileDialog() {
     },
   });
 
-  async function onSubmit(values) {
+  async function onSubmit(values: { path: string; delimiter: string; quote: string; tableName: string; varchar: string; }) {
     const { path, delimiter, quote, tableName, varchar } = values;
 
     if (!path || !delimiter || !tableName || !varchar) {
@@ -47,14 +53,15 @@ export function LoadCsvFileDialog() {
     }
 
     try {
-      const result = await invoke("load_csv", {
-        path,
-        delimiter,
-        quote,
-        tableName,
-        varchar
-      });
+      const result = await invoke("load_csv", { path, delimiter, quote, tableName, varchar });
 
+      const duckdbConfig: DuckdbConfig = {
+        path: path.replace(/\.[^/.]+$/, '.duckdb'),
+        dialect: 'duckdb',
+      };
+      const data = await getDB(duckdbConfig);
+      appendDB(data);
+      setOpen(false);
       toast.success(`Load CSV successfully, elapsed time ${result} s`);
       return true;
     } catch (e) {

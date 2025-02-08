@@ -5,6 +5,7 @@ import * as dialog from '@tauri-apps/plugin-dialog';
 import { PrimitiveAtom, useAtom, useAtomValue } from 'jotai';
 import { CodeIcon, DownloadIcon, EyeIcon, RefreshCw } from 'lucide-react';
 import { Suspense, useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 import { Stack, ToolbarContainer } from '@/components/Toolbar';
 import { TransposeIcon } from '@/components/custom/Icons';
@@ -50,7 +51,7 @@ export function QueryView({ context }: { context: QueryContextAtom }) {
         setError(res?.message);
       }
     } catch (error) {
-      console.error(error);
+      toast.error(`${error}`);
       setError(error as string);
     } finally {
       setLoading(false);
@@ -61,7 +62,7 @@ export function QueryView({ context }: { context: QueryContextAtom }) {
       const ctx = atomStore.get(context);
       await exportData({ file }, ctx);
     } catch (error) {
-      console.error(error);
+      toast.error(`${error}`);
     }
   };
 
@@ -184,6 +185,7 @@ function PageSizeToolbar({ query, ctx, exportData }: PageSizeToolbarProps) {
     });
     if (file) {
       exportData(file);
+      toast.success("Export CSV file successfullt.");
     }
   };
   return (

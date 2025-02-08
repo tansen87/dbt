@@ -58,7 +58,6 @@ impl Connection for DuckDbDialect {
   }
 
   async fn export(&self, sql: &str, file: &str) {
-    // api::duck_fetch_all(&self.path, sql, file, self.cwd.clone()).unwrap();
     match api::duck_fetch_all(&self.path, sql, file, self.cwd.clone()) {
       Ok(_) => println!("Export successful"),
       Err(e) => println!("Export failed: {:?}", e),
@@ -177,7 +176,7 @@ pub async fn csv2duckdb(
 ) -> anyhow::Result<()> {
   let parent_path = Path::new(&path).parent().unwrap().to_str().unwrap();
   let file_name = Path::new(&path).file_stem().unwrap().to_str().unwrap();
-  let output_path = format!("{parent_path}/{file_name}.c2d.duckdb");
+  let output_path = format!("{parent_path}/{file_name}.duckdb");
 
   let conn = duckdb::Connection::open(output_path)?;
   let idata = format!(

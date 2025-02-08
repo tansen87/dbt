@@ -106,14 +106,11 @@ export async function exportCsv(
 ): Promise<ResultType> {
   console.debug('params:', params);
   const res = await invoke<ArrowResponse>('export', params);
-  console.log(res);
-
   return convert(res);
 }
 
 export async function getDB(option: DialectConfig): Promise<DBType> {
   const tree: TreeNode = await invoke('get_db', { dialect: option });
-  console.log('tree:', tree);
   return {
     id: nanoid(),
     dialect: option.dialect,
@@ -135,7 +132,6 @@ export async function showColumns(
   table: string,
   dialect: DialectConfig,
 ): Promise<ResultType> {
-  console.log(table, dialect);
   const res = await invoke('show_column', { table, dialect });
   return convert(res as ArrowResponse);
 }
@@ -144,14 +140,12 @@ export async function dropTable(
   table: string,
   dialect: DialectConfig,
 ): Promise<ResultType> {
-  console.log(table, dialect);
   const res = await invoke('drop_table', { table, dialect });
   return convert(res as ArrowResponse);
 }
 
 export async function formatSQL(sql: string): Promise<string> {
   const res = await invoke<string>('format_sql', { sql });
-  console.log('format sql:', res);
   return res;
 }
 

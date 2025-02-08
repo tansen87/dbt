@@ -216,6 +216,7 @@ function DataViewToolbar() {
           tooltip="Value Viewer"
         />
         <TooltipButton
+          disabled
           icon={<DownloadIcon />}
           tooltip="Export to CSV"
           onClick={() => {}}

@@ -125,7 +125,6 @@ type TabsAction = {
 };
 
 export const useTabsStore = create<TabsState & TabsAction>()(
-  // immer(
   persist(
     (set, _get) => ({
       ids: [],
@@ -202,7 +201,6 @@ export const useTabsStore = create<TabsState & TabsAction>()(
       storage: createJSONStorage(() => localStorage),
     },
   ),
-  // ),
 );
 
 export const tabsStoreAtom = atomWithStore(useTabsStore);
@@ -280,12 +278,6 @@ export function getParams(
   const table = getTable(dbId, tableId);
 
   let tableName = ctx.tableName ?? table?.path ?? tableId;
-
-  // if (dialect?.dialect == 'postgres') {
-  //   (dialect as PostgresDialectType).database = table?.path.split(
-  //     '.',
-  //   )[0] as string;
-  // }
 
   if (tableName.endsWith('.csv')) {
     const csv = atomStore.get(settingAtom).csv;

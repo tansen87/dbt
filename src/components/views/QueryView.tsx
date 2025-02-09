@@ -180,12 +180,20 @@ function PageSizeToolbar({ query, ctx, exportData }: PageSizeToolbarProps) {
   const handleExport = async () => {
     const file = await dialog.save({
       title: 'Export',
-      defaultPath: `xxx-${new Date().getTime()}.csv`,
+      defaultPath: `export-${new Date().getTime()}.csv`,
       filters: [{ name: 'CSV', extensions: ['csv'] }],
     });
     if (file) {
-      exportData(file);
-      toast.success("Export CSV file successfullt.");
+      const loadingId = toast.loading('Exporting CSV file...');
+      exportData(file)
+        .then(() => {
+          toast.dismiss(loadingId);
+          toast.success("Export CSV file successfully.");
+        })
+        .catch((e) => {
+          toast.dismiss(loadingId);
+          toast.error(`Failed to export CSV file: ${e}`);
+        });
     }
   };
   return (

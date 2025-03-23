@@ -5,5 +5,4 @@ pub mod connection;
 pub mod duck;
 pub mod file;
 pub mod folder;
-pub mod sqlite;
 pub mod utils;

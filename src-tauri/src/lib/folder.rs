@@ -242,5 +242,5 @@ async fn test_table() {
     .find("123", r"D:/Code/duckdb/data/parquet-testing/decimal")
     .await
     .unwrap();
-  print_batches(&[res.batch]);
+  print_batches(&[res.batch]).unwrap();
 }

@@ -1,4 +1,3 @@
-use std::path::Path;
 use std::sync::Mutex;
 use std::time::Instant;
 
@@ -14,7 +13,6 @@ use crate::duck;
 use crate::duck::DuckDbDialect;
 use crate::file::FileDialect;
 use crate::folder::FolderDialect;
-use crate::sqlite::SqliteDialect;
 use crate::utils::TreeNode;
 
 pub struct OpenedUrls(pub Mutex<Option<Vec<url::Url>>>);
@@ -50,10 +48,6 @@ pub async fn get_dialect(
       path: path.unwrap(),
       cwd,
     })),
-    "sqlite" => Some(Box::new(SqliteDialect {
-      path: path.unwrap(),
-    })),
-    // _ => Err("not support dialect".to_string()),
     _ => None,
   }
 }
@@ -209,7 +203,7 @@ pub async fn drop_table(
 pub async fn format_sql(sql: &str) -> Result<String, String> {
   let params = QueryParams::default();
   let options = FormatOptions::default();
-  Ok(sqlformat::format(sql, &params, options))
+  Ok(sqlformat::format(sql, &params, &options))
 }
 
 #[tauri::command]

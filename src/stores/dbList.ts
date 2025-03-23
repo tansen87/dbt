@@ -22,7 +22,6 @@ export type DialectType =
   | 'folder'
   | 'file'
   | 'duckdb'
-  | 'sqlite'
 
 export type DuckdbConfig = {
   path: string;

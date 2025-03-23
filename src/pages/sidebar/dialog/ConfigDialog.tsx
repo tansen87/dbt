@@ -76,14 +76,12 @@ export function ConfigDialog({
                     <SelectContent>
                       <SelectItem value="duckdb">DuckDB</SelectItem>
                       <SelectItem value="folder">Data Folder</SelectItem>
-                      <SelectItem value="sqlite">SQLite</SelectItem>
                     </SelectContent>
                   </Select>
                 </FormItem>
               )}
             />
             {watchDialect == 'duckdb' ||
-            watchDialect == 'sqlite' ||
             watchDialect == 'folder' ? (
               <>
                 <FormField

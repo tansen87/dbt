@@ -175,8 +175,8 @@ pub async fn csv2duckdb(
   varchar: String,
 ) -> anyhow::Result<()> {
   let parent_path = Path::new(&path).parent().unwrap().to_str().unwrap();
-  let file_name = Path::new(&path).file_stem().unwrap().to_str().unwrap();
-  let output_path = format!("{parent_path}/{file_name}.duckdb");
+  let file_stem = Path::new(&path).file_stem().unwrap().to_str().unwrap();
+  let output_path = format!("{parent_path}/{file_stem}.duckdb");
 
   let conn = duckdb::Connection::open(output_path)?;
   let idata = format!(

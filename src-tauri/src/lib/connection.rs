@@ -1,20 +1,22 @@
 use async_trait::async_trait;
 
+use anyhow::Result;
+
 use crate::api::RawArrowData;
 use crate::ast;
 use crate::utils::TreeNode;
 
 #[async_trait]
 pub trait Connection: Sync + Send {
-  async fn get_db(&self) -> anyhow::Result<TreeNode>;
-  async fn query(&self, _sql: &str, _limit: usize, _offset: usize) -> anyhow::Result<RawArrowData> {
+  async fn get_db(&self) -> Result<TreeNode>;
+  async fn query(&self, _sql: &str, _limit: usize, _offset: usize) -> Result<RawArrowData> {
     unimplemented!()
   }
 
-  async fn query_count(&self, _sql: &str) -> anyhow::Result<usize> {
+  async fn query_count(&self, _sql: &str) -> Result<usize> {
     unimplemented!()
   }
-  async fn query_all(&self, _sql: &str) -> anyhow::Result<RawArrowData> {
+  async fn query_all(&self, _sql: &str) -> Result<RawArrowData> {
     unimplemented!()
   }
 
@@ -27,7 +29,7 @@ pub trait Connection: Sync + Send {
     sql: &str,
     limit: Option<usize>,
     offset: Option<usize>,
-  ) -> anyhow::Result<RawArrowData> {
+  ) -> Result<RawArrowData> {
     let mut sql = sql.to_string();
 
     let dialect = self.dialect();
@@ -50,7 +52,7 @@ pub trait Connection: Sync + Send {
     Ok(res)
   }
 
-  async fn _sql_row_count(&self, _sql: &str) -> anyhow::Result<usize> {
+  async fn _sql_row_count(&self, _sql: &str) -> Result<usize> {
     unimplemented!()
   }
 
@@ -61,7 +63,7 @@ pub trait Connection: Sync + Send {
     offset: usize,
     where_: &str,
     order_by: &str,
-  ) -> anyhow::Result<RawArrowData> {
+  ) -> Result<RawArrowData> {
     let mut sql = self._table_query_sql(table, where_, order_by);
 
     if limit != 0 {
@@ -81,19 +83,19 @@ pub trait Connection: Sync + Send {
     res.map(|r| RawArrowData { total, ..r })
   }
 
-  async fn show_schema(&self, _schema: &str) -> anyhow::Result<RawArrowData> {
+  async fn show_schema(&self, _schema: &str) -> Result<RawArrowData> {
     unimplemented!()
   }
 
-  async fn show_column(&self, _schema: Option<&str>, _table: &str) -> anyhow::Result<RawArrowData> {
+  async fn show_column(&self, _schema: Option<&str>, _table: &str) -> Result<RawArrowData> {
     unimplemented!()
   }
 
-  async fn drop_table(&self, _schema: Option<&str>, _table: &str) -> anyhow::Result<String> {
+  async fn drop_table(&self, _schema: Option<&str>, _table: &str) -> Result<String> {
     unimplemented!()
   }
 
-  async fn table_row_count(&self, _table: &str, _where: &str) -> anyhow::Result<usize> {
+  async fn table_row_count(&self, _table: &str, _where: &str) -> Result<usize> {
     unimplemented!()
   }
 
@@ -129,10 +131,10 @@ pub trait Connection: Sync + Send {
     unimplemented!()
   }
 
-  async fn find(&self, value: &str, path: &str) -> anyhow::Result<RawArrowData> {
+  async fn find(&self, value: &str, path: &str) -> Result<RawArrowData> {
     unimplemented!()
   }
-  async fn execute(&self, sql: &str) -> anyhow::Result<usize> {
+  async fn execute(&self, sql: &str) -> Result<usize> {
     unimplemented!()
   }
 }

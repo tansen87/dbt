@@ -1,13 +1,13 @@
 use std::sync::Mutex;
 use std::time::Instant;
 
+use anyhow::Result;
 use serde::Deserialize;
 use serde::Serialize;
 use sqlformat::{FormatOptions, QueryParams};
 use tauri::State;
 
-use crate::api;
-use crate::api::ArrowResponse;
+use crate::api::{self, ArrowResponse};
 use crate::connection::Connection;
 use crate::duck;
 use crate::duck::DuckDbDialect;

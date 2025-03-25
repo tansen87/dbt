@@ -1,10 +1,10 @@
 use std::env::{current_dir, set_current_dir};
 use std::path::Path;
 
+use anyhow::Result;
 use async_trait::async_trait;
 
-use crate::api;
-use crate::api::RawArrowData;
+use crate::api::{self, RawArrowData};
 use crate::connection::Connection;
 use crate::utils::{build_tree, get_file_name, Table, TreeNode};
 
@@ -20,7 +20,7 @@ impl Connection for DuckDbDialect {
     "duckdb"
   }
 
-  async fn get_db(&self) -> anyhow::Result<TreeNode> {
+  async fn get_db(&self) -> Result<TreeNode> {
     let conn = self.connect()?;
     let tables = get_tables(&conn, None)?;
     Ok(TreeNode {
@@ -41,7 +41,7 @@ impl Connection for DuckDbDialect {
     }
   }
 
-  async fn show_schema(&self, schema: &str) -> anyhow::Result<RawArrowData> {
+  async fn show_schema(&self, schema: &str) -> Result<RawArrowData> {
     let sql = format!(
       "
     select * from information_schema.tables
@@ -53,7 +53,7 @@ impl Connection for DuckDbDialect {
     self.query(&sql, 0, 0).await
   }
 
-  async fn query(&self, sql: &str, _limit: usize, _offset: usize) -> anyhow::Result<RawArrowData> {
+  async fn query(&self, sql: &str, _limit: usize, _offset: usize) -> Result<RawArrowData> {
     api::query(&self.path, sql, 0, 0, self.cwd.clone())
   }
 
@@ -64,14 +64,14 @@ impl Connection for DuckDbDialect {
     }
   }
 
-  async fn table_row_count(&self, table: &str, r#where: &str) -> anyhow::Result<usize> {
+  async fn table_row_count(&self, table: &str, r#where: &str) -> Result<usize> {
     let conn = self.connect()?;
     let sql = self._table_count_sql(table, r#where);
     let total = conn.query_row(&sql, [], |row| row.get::<_, usize>(0))?;
     Ok(total)
   }
 
-  async fn show_column(&self, schema: Option<&str>, table: &str) -> anyhow::Result<RawArrowData> {
+  async fn show_column(&self, schema: Option<&str>, table: &str) -> Result<RawArrowData> {
     let (db, tbl) = if schema.is_none() && table.contains(".") {
       let parts: Vec<&str> = table.splitn(2, '.').collect();
       (parts[0], parts[1])
@@ -85,7 +85,7 @@ impl Connection for DuckDbDialect {
     self.query(&sql, 0, 0).await
   }
 
-  async fn drop_table(&self, schema: Option<&str>, table: &str) -> anyhow::Result<String> {
+  async fn drop_table(&self, schema: Option<&str>, table: &str) -> Result<String> {
     let (db, tbl) = if schema.is_none() && table.contains(".") {
       let parts: Vec<&str> = table.splitn(2, '.').collect();
       (parts[0], parts[1])
@@ -109,13 +109,13 @@ impl Connection for DuckDbDialect {
   }
 
   #[allow(clippy::unused_async)]
-  async fn query_count(&self, sql: &str) -> anyhow::Result<usize> {
+  async fn query_count(&self, sql: &str) -> Result<usize> {
     let conn = self.connect()?;
     let total = conn.query_row(sql, [], |row| row.get::<_, usize>(0))?;
     Ok(total)
   }
 
-  async fn execute(&self, sql: &str) -> anyhow::Result<usize> {
+  async fn execute(&self, sql: &str) -> Result<usize> {
     if let Some(cwd) = &self.cwd {
       let _ = set_current_dir(cwd);
     }
@@ -131,12 +131,12 @@ impl Connection for DuckDbDialect {
 }
 
 impl DuckDbDialect {
-  fn connect(&self) -> anyhow::Result<duckdb::Connection> {
+  fn connect(&self) -> Result<duckdb::Connection> {
     Ok(duckdb::Connection::open(&self.path)?)
   }
 }
 
-pub fn get_tables(conn: &duckdb::Connection, schema: Option<&str>) -> anyhow::Result<Vec<Table>> {
+pub fn get_tables(conn: &duckdb::Connection, schema: Option<&str>) -> Result<Vec<Table>> {
   let mut sql = r#"
   select table_name, table_type, table_schema, if(table_type='VIEW', 'view', 'table') as type
   from information_schema.tables
@@ -173,12 +173,14 @@ pub async fn csv2duckdb(
   quote: String,
   table_name: String,
   varchar: String,
-) -> anyhow::Result<()> {
+) -> Result<String, String> {
   let parent_path = Path::new(&path).parent().unwrap().to_str().unwrap();
   let file_stem = Path::new(&path).file_stem().unwrap().to_str().unwrap();
   let output_path = format!("{parent_path}/{file_stem}.duckdb");
 
-  let conn = duckdb::Connection::open(output_path)?;
+  let conn = duckdb::Connection::open(&output_path)
+    .map_err(|e| format!("Failed to open duckdb connection: {}", e))?;
+
   let idata = format!(
     "
     CREATE TABLE {table_name}
@@ -187,5 +189,9 @@ pub async fn csv2duckdb(
     "
   );
 
-  Ok(conn.execute_batch(&idata)?)
+  conn
+    .execute_batch(&idata)
+    .map_err(|e| format!("Failed to insert csv to duckdb: {}", e))?;
+
+  Ok("CSV imported successfully into DuckDB".to_string())
 }

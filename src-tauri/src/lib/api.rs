@@ -1,6 +1,6 @@
 use std::env::{current_dir, set_current_dir};
 
-use anyhow::anyhow;
+use anyhow::{Result, anyhow};
 use arrow::{ipc::writer::StreamWriter, record_batch::RecordBatch};
 use duckdb::Connection;
 use serde::{Deserialize, Serialize};
@@ -30,7 +30,7 @@ pub struct ArrowResponse {
   pub elapsed: Option<u128>,
 }
 
-pub fn convert(res: anyhow::Result<RawArrowData>, elapsed: Option<u128>) -> ArrowResponse {
+pub fn convert(res: Result<RawArrowData>, elapsed: Option<u128>) -> ArrowResponse {
   match res {
     Ok(raw) => match serialize_preview(&raw.batch) {
       Ok(data) => ArrowResponse {
@@ -60,13 +60,13 @@ pub fn convert(res: anyhow::Result<RawArrowData>, elapsed: Option<u128>) -> Arro
   }
 }
 
-pub fn serialize_preview(record: &RecordBatch) -> Result<Vec<u8>, arrow::error::ArrowError> {
+pub fn serialize_preview(record: &RecordBatch) -> Result<Vec<u8>> {
   let mut writer = StreamWriter::try_new(Vec::new(), &record.schema())?;
   writer.write(record)?;
-  writer.into_inner()
+  Ok(writer.into_inner()?)
 }
 
-pub fn fetch_all(path: &str, sql: &str, cwd: Option<String>) -> anyhow::Result<RecordBatch> {
+pub fn fetch_all(path: &str, sql: &str, cwd: Option<String>) -> Result<RecordBatch> {
   if let Some(cwd) = &cwd {
     let _ = set_current_dir(cwd);
   }
@@ -84,7 +84,7 @@ pub fn fetch_all(path: &str, sql: &str, cwd: Option<String>) -> anyhow::Result<R
   Ok(arrow::compute::concat_batches(&schema, &records)?)
 }
 
-pub fn duck_fetch_all(path: &str, sql: &str, file: &str, cwd: Option<String>) -> anyhow::Result<()> {
+pub fn duck_fetch_all(path: &str, sql: &str, file: &str, cwd: Option<String>) -> Result<()> {
   if let Some(cwd) = &cwd {
     let _ = set_current_dir(cwd);
   }
@@ -95,7 +95,7 @@ pub fn duck_fetch_all(path: &str, sql: &str, file: &str, cwd: Option<String>) ->
   let con = Connection::open(path);
   let db = con.map_err(|err| anyhow!("Failed to open database connection: {}", err))?;
   let edata = format!("COPY ({cleaned_sql}) TO '{file}' (DELIMITER '|');");
-  anyhow::Ok(db.execute_batch(&edata)?)
+  Ok(db.execute_batch(&edata)?)
 }
 
 pub fn query(
@@ -104,7 +104,7 @@ pub fn query(
   _limit: usize,
   _offset: usize,
   cwd: Option<String>,
-) -> anyhow::Result<RawArrowData> {
+) -> Result<RawArrowData> {
   if let Some(cwd) = &cwd {
     let _ = set_current_dir(cwd);
   }

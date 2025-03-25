@@ -1,12 +1,12 @@
 use std::fs;
 use std::path::Path;
 
+use anyhow::{Result, anyhow};
 use arrow::array::{Array, StringArray};
 use async_trait::async_trait;
 use glob::glob;
 
-use crate::api;
-use crate::api::RawArrowData;
+use crate::api::{self, RawArrowData};
 use crate::connection::Connection;
 use crate::utils::{write_csv, TreeNode};
 
@@ -18,15 +18,15 @@ pub struct FolderDialect {
 
 #[async_trait]
 impl Connection for FolderDialect {
-  async fn get_db(&self) -> anyhow::Result<TreeNode> {
-    directory_tree(self.path.as_str()).ok_or_else(|| anyhow::anyhow!("null"))
+  async fn get_db(&self) -> Result<TreeNode> {
+    directory_tree(self.path.as_str()).ok_or_else(|| anyhow!("null"))
   }
 
-  async fn query(&self, sql: &str, limit: usize, offset: usize) -> anyhow::Result<RawArrowData> {
+  async fn query(&self, sql: &str, limit: usize, offset: usize) -> Result<RawArrowData> {
     api::query(":memory:", sql, limit, offset, self.cwd.clone())
   }
 
-  async fn table_row_count(&self, table: &str, r#where: &str) -> anyhow::Result<usize> {
+  async fn table_row_count(&self, table: &str, r#where: &str) -> Result<usize> {
     let conn = self.connect()?;
     let sql = self._table_count_sql(table, r#where);
     let total = conn.query_row(&sql, [], |row| row.get::<_, u32>(0))?;
@@ -41,7 +41,7 @@ impl Connection for FolderDialect {
     }
   }
 
-  async fn show_column(&self, _schema: Option<&str>, table: &str) -> anyhow::Result<RawArrowData> {
+  async fn show_column(&self, _schema: Option<&str>, table: &str) -> Result<RawArrowData> {
     let path = Path::new(table);
 
     let ext = path.extension().unwrap_or_default();
@@ -68,7 +68,7 @@ impl Connection for FolderDialect {
     log::info!("show columns: {}", &sql);
     self.query(&sql, 0, 0).await
   }
-  async fn drop_table(&self, _schema: Option<&str>, table: &str) -> anyhow::Result<String> {
+  async fn drop_table(&self, _schema: Option<&str>, table: &str) -> Result<String> {
     let path = Path::new(table);
     if path.is_dir() {
       fs::remove_dir_all(path)?;
@@ -79,7 +79,7 @@ impl Connection for FolderDialect {
   }
 
   #[allow(clippy::unused_async)]
-  async fn query_count(&self, sql: &str) -> anyhow::Result<usize> {
+  async fn query_count(&self, sql: &str) -> Result<usize> {
     let conn = self.connect()?;
     let total = conn.query_row(sql, [], |row| row.get::<_, usize>(0))?;
     Ok(total)
@@ -89,7 +89,7 @@ impl Connection for FolderDialect {
     name.to_string()
   }
   #[allow(clippy::unused_async)]
-  async fn find(&self, value: &str, table: &str) -> anyhow::Result<RawArrowData> {
+  async fn find(&self, value: &str, table: &str) -> Result<RawArrowData> {
     let path = Path::new(table);
 
     let ext = path.extension().unwrap_or_default();
@@ -162,7 +162,7 @@ impl FolderDialect {
     }
   }
 
-  fn connect(&self) -> anyhow::Result<duckdb::Connection> {
+  fn connect(&self) -> Result<duckdb::Connection> {
     Ok(duckdb::Connection::open_in_memory()?)
   }
 }
@@ -234,13 +234,13 @@ pub fn directory_tree<P: AsRef<Path>>(path: P) -> Option<TreeNode> {
   })
 }
 
-#[tokio::test]
-async fn test_table() {
-  use arrow::util::pretty::print_batches;
-  let _d = FolderDialect::new(r"D:\Code\duckdb\data\parquet-testing");
-  let res = _d
-    .find("123", r"D:/Code/duckdb/data/parquet-testing/decimal")
-    .await
-    .unwrap();
-  print_batches(&[res.batch]).unwrap();
-}
+// #[tokio::test]
+// async fn test_table() {
+//   use arrow::util::pretty::print_batches;
+//   let _d = FolderDialect::new(r"D:\Code\duckdb\data\parquet-testing");
+//   let res = _d
+//     .find("123", r"D:/Code/duckdb/data/parquet-testing/decimal")
+//     .await
+//     .unwrap();
+//   print_batches(&[res.batch]).unwrap();
+// }

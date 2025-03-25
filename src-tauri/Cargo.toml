@@ -3,9 +3,9 @@ name = "duckling"
 version = "0.1.0"
 description = "duckling"
 authors = ["you"]
-license = ""
+license = "MIT"
 repository = ""
-edition = "2021"
+edition = "2024"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [lib]
@@ -14,12 +14,12 @@ path = "src/lib/mod.rs"
 crate-type = ["lib", "staticlib", "cdylib"]
 
 [build-dependencies]
-tauri-build = { version = "2.0.1", features = [] }
+tauri-build = { version = "2.1.0", features = [] }
 
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-arrow = { version = "54.1.0", features = ["prettyprint", "csv"] }
+arrow = { version = "54.3.0", features = ["prettyprint", "csv"] }
 
 duckdb = { version = "1.2.1", features = [
     # "modern-full",
@@ -28,8 +28,8 @@ duckdb = { version = "1.2.1", features = [
 ] }
 
 futures-util = "0.3"
-rust_decimal = { version = "1", features = ["db-tokio-postgres"] }
-tauri = { version = "2.2.5", features = [
+rust_decimal = "1"
+tauri = { version = "2.4.0", features = [
     "devtools",
     "image-ico",
     "image-png",
@@ -38,7 +38,7 @@ tauri = { version = "2.2.5", features = [
 # tauri plugin
 tauri-plugin-shell = "2.2.0"
 tauri-plugin-dialog = "2.2.0"
-tauri-plugin-log = "2.2.1"
+tauri-plugin-log = "2.3.1"
 tauri-plugin-process = "2.2.0"
 tauri-plugin-window-state = "2.2.1"
 tauri-plugin-clipboard-manager = "2.2.1"
@@ -57,7 +57,7 @@ tokio = { version = "1.36.0", features = ["macros", "test-util"] }
 sqlparser = { version = "0.53.0", features = ["json_example"] }
 sqlformat = "0.3.5"
 glob = "*"
-regex = "1.10.4"
+regex = "1.11.1"
 
 [target."cfg(not(any(target_os = \"android\", target_os = \"ios\")))".dependencies]
 tauri-plugin-updater = "2.5.0"

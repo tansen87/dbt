@@ -1,5 +1,6 @@
 use std::path::PathBuf;
 
+use anyhow::Result;
 use async_trait::async_trait;
 
 use crate::api::{self, RawArrowData};
@@ -12,14 +13,14 @@ pub struct FileDialect {
 }
 
 impl FileDialect {
-  fn connect(&self) -> anyhow::Result<duckdb::Connection> {
+  fn connect(&self) -> Result<duckdb::Connection> {
     Ok(duckdb::Connection::open_in_memory()?)
   }
 }
 
 #[async_trait]
 impl Connection for FileDialect {
-  async fn get_db(&self) -> anyhow::Result<TreeNode> {
+  async fn get_db(&self) -> Result<TreeNode> {
     let path = PathBuf::from(self.path.as_str());
 
     Ok(TreeNode {
@@ -32,11 +33,11 @@ impl Connection for FileDialect {
     })
   }
 
-  async fn query(&self, sql: &str, limit: usize, offset: usize) -> anyhow::Result<RawArrowData> {
+  async fn query(&self, sql: &str, limit: usize, offset: usize) -> Result<RawArrowData> {
     api::query(":memory:", sql, limit, offset, None)
   }
 
-  async fn table_row_count(&self, table: &str, r#where: &str) -> anyhow::Result<usize> {
+  async fn table_row_count(&self, table: &str, r#where: &str) -> Result<usize> {
     let conn = self.connect()?;
     let sql = self._table_count_sql(table, r#where);
     let total = conn.query_row(&sql, [], |row| row.get::<_, usize>(0))?;

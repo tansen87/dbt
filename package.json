@@ -54,7 +54,7 @@
     "@tauri-apps/plugin-store": "^2.0.0",
     "@tauri-apps/plugin-updater": "^2.0.0",
     "@visactor/react-vtable": "1.5.6",
-    "@visactor/vtable": "1.5.6",
+    "@visactor/vtable": "1.17.4",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "dayjs": "^1.11.12",

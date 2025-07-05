@@ -5,7 +5,7 @@ import { useDialog } from '@/components/custom/use-dialog';
 
 import ErrorBoundary from '@/components/ErrorBoundary';
 
-import { Button, ButtonProps } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import {
   ContextMenu,
   ContextMenuContent,
@@ -43,7 +43,7 @@ import {
   XIcon,
 } from 'lucide-react';
 import { shake } from 'radash';
-import {
+import React, {
   PropsWithChildren,
   ReactNode,
   useContext,
@@ -230,7 +230,7 @@ export function PageTabs({
   });
   return (
     <Tabs
-      className="w-full h-full flex flex-col justify-start items-start"
+      className="w-full h-full flex flex-col justify-start items-start gap-0"
       value={activeKey}
       onValueChange={onChange}
     >
@@ -284,11 +284,11 @@ export function DefaultTab({ tab, onRemove }: TabItemProps) {
         </>
       </Tooltip>
       <Button
-        asChild
+        // asChild
         variant="ghost"
         size="icon"
         className={cn(
-          'rounded-lg size-4 invisible ml-1',
+          'rounded-lg size-5 invisible ml-1',
           'group-hover:visible',
           'group-data-[state=active]:visible',
           'hover:bg-selection',
@@ -450,7 +450,7 @@ export function Arrow({
   );
 }
 
-const ArrowButton = (props: ButtonProps) => (
+const ArrowButton = (props: React.ComponentProps<typeof Button>) => (
   <Button
     {...props}
     className={cn(

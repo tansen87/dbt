@@ -1,7 +1,9 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 use std::fs::File;
+use std::io::{BufRead, BufReader};
 use std::path::Path;
 
+use anyhow::Result;
 use arrow::csv::WriterBuilder;
 use arrow::record_batch::RecordBatch;
 use chrono::NaiveDate;
@@ -132,4 +134,33 @@ pub fn write_csv(file: &str, batch: &RecordBatch) {
 pub fn date_to_days(t: &NaiveDate) -> i32 {
   t.signed_duration_since(NaiveDate::from_ymd_opt(1970, 1, 1).unwrap())
     .num_days() as i32
+}
+
+/// Check the delimiter of CSV
+pub fn detect_separator(path: &str) -> Result<u8> {
+  let file = File::open(path)?;
+  let reader = BufReader::new(file);
+
+  let mut lines_iter = reader.lines();
+
+  let seg_symbols = [b';', b',', b'\t', b'|', b'^'];
+  let mut separators_count: HashMap<u8, usize> = seg_symbols.iter().map(|&c| (c, 0)).collect();
+  let mut max_count = 0;
+  let mut separator = b',';
+
+  // read next line after skipping
+  if let Some(next_line) = lines_iter.next() {
+    let line = next_line?;
+    for c in line.as_bytes() {
+      if let Some(count) = separators_count.get_mut(c) {
+        *count += 1;
+        if *count > max_count {
+          max_count = *count;
+          separator = *c;
+        }
+      }
+    }
+  }
+
+  Ok(separator)
 }

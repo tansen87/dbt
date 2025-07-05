@@ -2,7 +2,7 @@ import { OnChange } from '@monaco-editor/react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { focusAtom } from 'jotai-optics';
 import { nanoid } from 'nanoid';
-import { useMemo, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { DBType, schemaMapAtom } from '@/stores/dbList';
 import {
@@ -15,12 +15,12 @@ import {
   useTabsStore,
 } from '@/stores/tabs';
 
+import MonacoEditor, { EditorRef } from './MonacoEditor';
+import VerticalContainer from './VerticalContainer';
 import { docsAtom, runsAtom } from '@/stores/app';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { EditorToolbar } from './EditorToolbar';
-import MonacoEditor, { EditorRef } from './MonacoEditor';
 import { QueryTabs } from './QueryTabs';
-import VerticalContainer from './VerticalContainer';
 
 function createStore(item: Partial<QueryContextType>) {
   return {
@@ -51,7 +51,7 @@ export default function Editor({ context }: { context: EditorContextType }) {
 
   const schemaMap = useAtomValue(schemaMapAtom);
 
-  const tableSchema = useMemo(() => schemaMap.get(dbId) ?? [], [dbId]);
+  const tableSchema = schemaMap.get(dbId);
   const ref = useRef<EditorRef | null>(null);
 
   const handleChange: OnChange = (value, _event) => {
@@ -85,7 +85,7 @@ export default function Editor({ context }: { context: EditorContextType }) {
     const id = `${tab.id}@${nanoid()}`;
     if (action == 'new' || tab.children.length == 0) {
       const subContext: QueryContextType = createStore({
-        dbId: context.dbId,
+        dbId,
         schema: context.schema,
         tableId: context.tableId,
         type: 'query',
@@ -144,8 +144,12 @@ export default function Editor({ context }: { context: EditorContextType }) {
           <MonacoEditor
             ref={ref}
             value={stmt}
+            language="sql"
             onChange={handleChange}
-            tableSchema={tableSchema}
+            completeMeta={{
+              tables: tableSchema,
+              defaultDatabase: db?.defaultDatabase,
+            }}
             onRun={handleClick}
           />
         </div>

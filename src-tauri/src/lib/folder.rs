@@ -8,7 +8,7 @@ use glob::glob;
 
 use crate::api::{self, RawArrowData};
 use crate::connection::Connection;
-use crate::utils::{write_csv, TreeNode};
+use crate::utils::{write_csv, detect_separator, TreeNode};
 
 #[derive(Debug, Default)]
 pub struct FolderDialect {
@@ -43,6 +43,8 @@ impl Connection for FolderDialect {
 
   async fn show_column(&self, _schema: Option<&str>, table: &str) -> Result<RawArrowData> {
     let path = Path::new(table);
+    let sep = detect_separator(table).unwrap();
+    let sep_str = String::from(sep as char);
 
     let ext = path.extension().unwrap_or_default();
     let sql = if path.is_dir() {
@@ -54,14 +56,14 @@ impl Connection for FolderDialect {
 
       let pattern = format!("{table}/**/*.csv");
       if exist_glob(&pattern) {
-        tmp.push(format!("SELECT '*.csv' as file_type, * FROM (DESCRIBE select * FROM read_csv('{pattern}', union_by_name = true))"));
+        tmp.push(format!("SELECT '*.csv' as file_type, * FROM (DESCRIBE select * FROM read_csv('{pattern}', sep='{sep_str}', union_by_name = true))"));
       }
 
       tmp.join("\n union all \n")
     } else if ext == "parquet" {
       format!("DESCRIBE select * from read_parquet('{table}')")
     } else if ext == "csv" {
-      format!("DESCRIBE select * from read_csv('{table}', union_by_name=true)")
+      format!("DESCRIBE select * from read_csv('{table}', sep='{sep_str}', union_by_name=true)")
     } else {
       String::new()
     };
@@ -91,6 +93,8 @@ impl Connection for FolderDialect {
   #[allow(clippy::unused_async)]
   async fn find(&self, value: &str, table: &str) -> Result<RawArrowData> {
     let path = Path::new(table);
+    let sep = detect_separator(table).unwrap();
+    let sep_str = String::from(sep as char);
 
     let ext = path.extension().unwrap_or_default();
     let sql = if path.is_dir() {
@@ -105,7 +109,7 @@ impl Connection for FolderDialect {
       let pattern = format!("{table}/**/*.csv");
       if exist_glob(&pattern) {
         tmp.push(format!(
-          "select * FROM read_csv('{pattern}', union_by_name=true, filename=true)"
+          "select * FROM read_csv('{pattern}', sep='{sep_str}', union_by_name=true, filename=true)"
         ));
       }
 
@@ -113,7 +117,7 @@ impl Connection for FolderDialect {
     } else if ext == "parquet" {
       format!("select * from read_parquet('{table}', union_by_name=true, filename=true)")
     } else if ext == "csv" {
-      format!("select * from read_csv('{table}', union_by_name=true, filename=true)")
+      format!("select * from read_csv('{table}', sep='{sep_str}', union_by_name=true, filename=true)")
     } else {
       String::new()
     };

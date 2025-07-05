@@ -1,9 +1,9 @@
 import { IconFileTypeCsv } from '@tabler/icons-react';
+import * as dialog from '@tauri-apps/plugin-dialog';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { invoke } from '@tauri-apps/api/core';
 import { toast } from 'sonner';
-// import { useAtom } from 'jotai';
 
 import { getDB } from '@/api';
 import { Dialog } from '@/components/custom/Dialog';
@@ -20,40 +20,36 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { DuckdbConfig, useDBListStore } from '@/stores/dbList';
-// import { settingAtom } from '@/stores/setting';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 export function LoadCsvFileDialog() {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const appendDB = useDBListStore((state) => state.append);
-  // const [settings] = useAtom(settingAtom);
 
   const form = useForm({
     defaultValues: {
         path: '',
-        delimiter: ',',
         quote: '"',
         tableName: 't1',
-        varchar: 'true',
+        allVarchar: 'true',
     },
   });
 
-  async function onSubmit(values: { path: string; delimiter: string; quote: string; tableName: string; varchar: string; }) {
-    const { path, delimiter, quote, tableName, varchar } = values;
+  async function onSubmit(values: { path: string; quote: string; tableName: string; allVarchar: string; }) {
+    const { path, quote, tableName, allVarchar } = values;
 
-    if (!path || !delimiter || !tableName || !varchar) {
-      let message = 'The following fields cannot be empty:\n';
-      if (!path) message += '- Csv path\n';
-      if (!delimiter) message += '- Delimiter\n';
-      if (!tableName) message += '- Table name\n';
-      if (!varchar) message += '- Varchar\n';
-
-      toast.error(message);
+    if (!path) {
+      toast.error('"Csv path" cannot be empty');
+      return false;
+    }
+    if (!tableName) {
+      toast.error('"Table name" cannot be empty');
       return false;
     }
 
     try {
-      const result = await invoke("load_csv", { path, delimiter, quote, tableName, varchar });
+      const result = await invoke("load_csv", { path, quote, tableName, allVarchar });
 
       const duckdbConfig: DuckdbConfig = {
         path: path.replace(/\.[^/.]+$/, '.duckdb'),
@@ -88,21 +84,24 @@ export function LoadCsvFileDialog() {
                 <FormItem className="flex items-center w-full">
                   <FormLabel className="w-1/5 mr-2 mt-2 shrink-0">Csv path</FormLabel>
                   <FormControl className="flex-grow">
-                    <Input {...field} className="w-full" />
+                    <div className="flex w-full items-center gap-1">
+                      <Input {...field} className="w-full" />
+                      <Button
+                        variant="outline"
+                        onClick={async (e) => {
+                          e.preventDefault();
+                          const file = await dialog.open({
+                            multiple: false,
+                          });
+                          if (file) {
+                            form.setValue('path', file);
+                          }
+                        }}
+                      >
+                        Select
+                      </Button>
+                    </div>
                   </FormControl>
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="delimiter"
-              render={({ field }) => (
-                <FormItem className="flex items-center w-full">
-                  <FormLabel className="w-1/5 mr-2 mt-2 shrink-0">Delimiter</FormLabel>
-                  <FormControl className="flex-grow">
-                    <Input {...field} className="w-full" />
-                  </FormControl>
-                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -134,12 +133,23 @@ export function LoadCsvFileDialog() {
             />
             <FormField
               control={form.control}
-              name="varchar"
+              name="allVarchar"
               render={({ field }) => (
                 <FormItem className="flex items-center w-full">
-                  <FormLabel className="w-1/5 mr-2 mt-2 shrink-0">Varchar</FormLabel>
+                  <FormLabel className="w-1/5 mr-2 mt-2 shrink-0">All Varchar</FormLabel>
                   <FormControl className="flex-grow">
-                    <Input {...field} className="w-full" />
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value || "true"}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select a value" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="true">True</SelectItem>
+                        <SelectItem value="false">False</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

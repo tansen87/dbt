@@ -6,7 +6,7 @@ use async_trait::async_trait;
 
 use crate::api::{self, RawArrowData};
 use crate::connection::Connection;
-use crate::utils::{build_tree, get_file_name, Table, TreeNode};
+use crate::utils::{Table, TreeNode, build_tree, detect_separator, get_file_name};
 
 #[derive(Debug, Default)]
 pub struct DuckDbDialect {
@@ -169,14 +169,16 @@ pub fn get_tables(conn: &duckdb::Connection, schema: Option<&str>) -> Result<Vec
 
 pub async fn csv2duckdb(
   path: String,
-  delimiter: String,
   quote: String,
   table_name: String,
-  varchar: String,
+  all_varchar: String,
 ) -> Result<String, String> {
   let parent_path = Path::new(&path).parent().unwrap().to_str().unwrap();
   let file_stem = Path::new(&path).file_stem().unwrap().to_str().unwrap();
   let output_path = format!("{parent_path}/{file_stem}.duckdb");
+
+  let sep = detect_separator(&path).map_err(|e| e.to_string())?;
+  let sep_str = String::from(sep as char);
 
   let conn = duckdb::Connection::open(&output_path)
     .map_err(|e| format!("Failed to open duckdb connection: {}", e))?;
@@ -185,7 +187,7 @@ pub async fn csv2duckdb(
     "
     CREATE TABLE {table_name}
     AS SELECT *
-    FROM read_csv('{path}', all_varchar={varchar}, sep='{delimiter}', quote='{quote}');
+    FROM read_csv('{path}', all_varchar={all_varchar}, sep='{sep_str}', quote='{quote}');
     "
   );
 

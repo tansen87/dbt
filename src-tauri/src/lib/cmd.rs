@@ -223,14 +223,13 @@ pub async fn find(
 #[tauri::command]
 pub async fn load_csv(
   path: String,
-  delimiter: String,
   quote: String,
   table_name: String,
-  varchar: String,
+  all_varchar: String,
 ) -> Result<String, String> {
   let start_time = Instant::now();
 
-  match duck::csv2duckdb(path, delimiter, quote, table_name, varchar).await {
+  match duck::csv2duckdb(path, quote, table_name, all_varchar).await {
     Ok(_) => {
       let end_time = Instant::now();
       let elapsed_time = end_time.duration_since(start_time).as_secs_f64();

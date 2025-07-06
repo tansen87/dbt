@@ -249,6 +249,7 @@ export const CanvasTable = React.memo(function CanvasTable({
             try {
               return (value as number)?.toFixed(precision);
             } catch (error) {
+              console.log('CanvasTable Line 252: ' + error);  // tmp
               return value;
             }
           }
@@ -313,7 +314,8 @@ export const CanvasTable = React.memo(function CanvasTable({
   const handleDropdownMenuClick: ComponentProps<
     typeof ListTable
   >['onDropdownMenuClick'] = async (e) => {
-    const transpose = tableRef.current?.transpose;
+    const table = tableRef.current;
+    const transpose = table?.transpose;
     if ((!transpose && e.row == 0) || (transpose && e.col == 0)) {
       if (e.menuKey == 'copy-field') {
         await writeText((e?.field as string) ?? '');
@@ -329,7 +331,14 @@ export const CanvasTable = React.memo(function CanvasTable({
       }
     } else {
       if (e.menuKey == 'copy') {
-        await writeText((e?.field as string) ?? '');
+        await writeText(table?.getCopyValue() ?? '');
+      } else if (e.menuKey == 'copy-with-text') {
+        const rows =
+          table?.getSelectedCellInfos()?.map((row) => {
+            return row.map((item) => item.dataValue).join(',');
+          }) ?? [];
+
+        await writeText(rows.join('\n'));
       }
     }
   };
@@ -395,7 +404,16 @@ export const CanvasTable = React.memo(function CanvasTable({
               },
             ];
           }
-          return [];
+          return [
+            {
+              menuKey: 'copy',
+              text: 'Copy',
+            },
+            {
+              menuKey: 'copy-with-text',
+              text: 'Copy with text',
+            }
+          ];
         },
       },
       hover: {
